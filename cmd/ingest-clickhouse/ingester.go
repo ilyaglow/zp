@@ -27,6 +27,7 @@ const (
 	zoneExtension         = "gz"
 	exceptionZoneFileName = "com.zone.gz"
 	exceptionZone         = "com"
+	tSize                 = 10000
 )
 
 func main() {
@@ -103,8 +104,8 @@ func send(conn *sql.DB, input <-chan zp.NSRecord) {
 
 		it++
 
-		if it == 100000 {
-			log.Println("Commit transaction with 100 000 entries")
+		if it == tSize {
+			log.Printf("Commit transaction with %d entries", tSize)
 			it = 0
 			if err := tx.Commit(); err != nil {
 				if strings.Contains(err.Error(), "Transaction") {
