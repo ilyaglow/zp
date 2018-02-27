@@ -11,22 +11,22 @@ import (
 	"github.com/miekg/dns"
 )
 
-// NSRecord represents a single record
-type NSRecord struct {
+// Record represents a single record
+type Record struct {
 	RType  string `db:"rtype"`  // record type: A, AAAA or NS by now
 	Domain string `db:"domain"` // domain name without tld
 	Value  string `db:"value"`  // value of the record: IPv4, IPv6 or nameserver domain name
 	TLD    string `db:"tld"`    // com, name, ru etc
 }
 
-// DBRecord is the NSRecord with a date
+// DBRecord is the Record with a date
 type DBRecord struct {
-	NSRecord
+	Record
 	Date time.Time `db:"date"` // actual data datetime
 }
 
 // NewRecord parses a line to a zone file record
-func NewRecord(line string, tld string) (*NSRecord, error) {
+func NewRecord(line string, tld string) (*Record, error) {
 	var (
 		rtype string
 		value string
@@ -69,7 +69,7 @@ func NewRecord(line string, tld string) (*NSRecord, error) {
 		n = strings.Join(parts[0:len(parts)-1], ".")
 	}
 
-	return &NSRecord{
+	return &Record{
 		Domain: n,
 		RType:  rtype,
 		Value:  value,
@@ -77,9 +77,9 @@ func NewRecord(line string, tld string) (*NSRecord, error) {
 	}, nil
 }
 
-// FetchZoneFile fetches gzipped zone file and push NSRecord entries
+// FetchZoneFile fetches gzipped zone file and push Record entries
 // to a channel specified in the config
-func FetchZoneFile(path string, tld string, rc chan NSRecord) error {
+func FetchZoneFile(path string, tld string, rc chan Record) error {
 	f, err := os.Open(path)
 	if err != nil {
 		return err

@@ -46,7 +46,7 @@ func main() {
 	}
 	_, err = conn.Exec(createStatement)
 
-	rc := make(chan zp.NSRecord)
+	rc := make(chan zp.Record)
 
 	var wg sync.WaitGroup
 	wg.Add(*nw)
@@ -80,7 +80,7 @@ func main() {
 	wg.Wait()
 }
 
-func send(conn *sql.DB, input <-chan zp.NSRecord) {
+func send(conn *sql.DB, input <-chan zp.Record) {
 	var it uint
 
 	tx, err := conn.Begin()
