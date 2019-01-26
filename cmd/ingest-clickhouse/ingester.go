@@ -22,7 +22,7 @@ const (
 			value	String,
 			tld		String,
 			date	Date DEFAULT today()
-		) engine=MergeTree(date,(domain,tld),8192)
+		) engine=MergeTree(date,(value,rtype),8192)
 	`
 	zoneExtension         = "gz"
 	exceptionZoneFileName = "com.zone.gz"
