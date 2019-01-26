@@ -44,17 +44,21 @@ func main() {
 	if err := conn.Ping(); err != nil {
 		log.Fatal(err)
 	}
-	_, err = conn.Exec(createStatement)
+	if _, err = conn.Exec(createStatement); err != nil {
+		log.Fatal(err)
+	}
 
 	rc := make(chan zp.Record)
 
 	var wg sync.WaitGroup
 	wg.Add(*nw)
 
-	for i := 1; i <= *nw; i++ {
+	for i := 0; i < *nw; i++ {
 		go func() {
 			defer wg.Done()
-			send(conn, rc)
+			if err := send(conn, rc); err != nil {
+				log.Println(err)
+			}
 		}()
 	}
 
@@ -80,17 +84,17 @@ func main() {
 	wg.Wait()
 }
 
-func send(conn *sql.DB, input <-chan zp.Record) {
+func send(conn *sql.DB, input <-chan zp.Record) error {
 	var it uint
 
 	tx, err := conn.Begin()
 	if err != nil {
-		log.Fatal(err)
+		return err
 	}
 
 	stmt, err := tx.Prepare(insertStatement)
 	if err != nil {
-		log.Fatal(err)
+		return err
 	}
 
 	for rec := range input {
@@ -99,7 +103,7 @@ func send(conn *sql.DB, input <-chan zp.Record) {
 			rec.Domain,
 			rec.Value,
 			rec.TLD); err != nil {
-			log.Fatal(err)
+			return err
 		}
 
 		it++
@@ -112,23 +116,23 @@ func send(conn *sql.DB, input <-chan zp.Record) {
 					log.Println(err)
 				} else {
 					log.Println("tx.Commit() failed")
-					log.Fatal(err)
+					return err
 				}
 			}
 			tx, err = conn.Begin()
 			if err != nil {
-				log.Fatal(err)
+				return err
 			}
 			stmt, err = tx.Prepare(insertStatement)
 			if err != nil {
-				log.Fatal(err)
+				return err
 			}
 		}
 	}
 
 	log.Println("Committing the tail")
 	if err := tx.Commit(); err != nil {
-		log.Fatal(err)
+		return err
 	}
-
+	return nil
 }
