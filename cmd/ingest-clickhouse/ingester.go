@@ -10,7 +10,7 @@ import (
 	"sync"
 
 	"github.com/ilyaglow/zp"
-	_ "github.com/mailru/go-clickhouse"
+	_ "github.com/kshvakov/clickhouse"
 )
 
 const (
